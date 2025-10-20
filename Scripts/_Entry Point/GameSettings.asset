@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b65d20651a9426645b260e9e26567236, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: bab1425d20396b942834b5e459a5c7c9, type: 2}
+    - {fileID: 11400000, guid: 816b2f7beca384941814f6323576b595, type: 2}
+    - {fileID: 11400000, guid: 1c8355044d537d649bedf995093c1d7c, type: 2}
+    - {fileID: 11400000, guid: 88913317a5b9ad1439c7091e6ba8ecb5, type: 2}
+    - {fileID: 11400000, guid: a9ad3a5c6638d804ebd5be7dbee33523, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: _firstLvlOrders
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[ItemData, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 5
+    - Name: 
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 10
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 10
+      Data: 3
+    - Name: 
+      Entry: 10
+      Data: 4
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: _numberContractPerVillager
+      Entry: 3
+      Data: 1
+    - Name: _baseStamina
+      Entry: 4
+      Data: 15
+    - Name: _craftPrice
+      Entry: 4
+      Data: 1
+    - Name: _numberVillagerPerHouse
+      Entry: 3
+      Data: 2
+    - Name: _spawnTime
+      Entry: 4
+      Data: 2
+    - Name: _dayDuration
+      Entry: 3
+      Data: 40
+    - Name: _extractionPrice
+      Entry: 4
+      Data: 1
+    - Name: _enemySortOrder
+      Entry: 7
+      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 150
+    - Name: 
+      Entry: 3
+      Data: 300
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: _villagerSortOrder
+      Entry: 7
+      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 301
+    - Name: 
+      Entry: 3
+      Data: 400
+    - Name: 
+      Entry: 8
+      Data: 
