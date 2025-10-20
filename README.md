@@ -1,158 +1,167 @@
-# Обзор игровых скриптов
-
-```mermaid
-flowchart TD
-    subgraph "Игровой цикл"
-        GD[GameDirector]
-        GCO[GameCycleOrchestrator]
-        DNS[DayNightSystem]
-        DC[DayCounter]
-        ST[StaminaSystem]
-    end
-    subgraph "Экономика и контракты"
-        WAL[Wallet]
-        CS[ContractSystem]
-        CPC[ContractPanelController]
-        CV[ContractView]
-    end
-    subgraph "Постройки"
-        BO[BuildingsOrchestrator]
-        BS[BuildingService]
-        BD[BuildingData & BuildingProgress]
-        BLD[Builder & BuildingView]
-        RTP[ResourceTransferController]
-    end
-    subgraph "Инвентарь и крафт"
-        SB[ServiceBase]
-        IS[InventoryService]
-        CHS[ChestService]
-        CCS[CraftCellService]
-        CRF[CraftService]
-        DDO[DragDropOrchestrator + UI]
-    end
-    subgraph "Поселенцы"
-        NPS[NpcSystem]
-        NS[NpcService]
-        NM[NpcManager]
-        MP[ManageBoard & Panel]
-    end
-    subgraph "Добыча ресурсов"
-        MS[MiningSystem]
-        RN[ResourceNode]
-        EIV[ExtractedItemView]
-    end
-    subgraph "Бой"
-        EO[EnemyOrchestrator]
-        WS[WaveService]
-        EM[EnemyManager]
-        BE[BaseEnemy & подклассы]
-        ATA[ArcherTowerAttack]
-    end
-    subgraph "Игрок и взаимодействия"
-        PO[PlayerOrchestrator]
-        PMV[PlayerMovement & PlayerView]
-        PI[PlayerInteraction]
-        BIO[BaseInteractableObject + наследники]
-        RTI[TransferItem]
-    end
-    subgraph "Мир и визуал"
-        SVC[SpriteViewController]
-        SD[SpriteDimmer]
-        CLD[CloudManager & Cloud]
-        TREE[TreeView & StiveView]
-    end
-
-    GD --> GCO
-    GCO --> DNS
-    GCO --> ST
-    GCO --> NPS
-    GCO --> CS
-    GCO --> EO
-    GCO --> MS
-    EO --> WS
-    EO --> EM
-    BO --> BS
-    BO --> IS
-    BO --> RTP
-    CS --> CPC
-    CPC --> CV
-    CRF --> CCS
-    DDO --> CCS
-    DDO --> CRF
-    NPS --> NM
-    NPS --> MP
-    NM --> MS
-    MS --> IS
-    MS --> CHS
-    PO --> PI
-    PI --> BIO
-    PO --> PMV
-    BIO --> RTP
-    DNS --> SD
-    SVC --> TREE
-    SVC --> CLD
-```
-
-## Краткие описания систем
-- **Игровой цикл.** `GameDirector` запускает подготовку волн и дневной цикл, который координирует `GameCycleOrchestrator`, распределяя действия между системами дня/ночи, поселенцами, контрактами, выносливостью и врагами, а также информируя интерфейс счётчика дней через событие `DayCounterChange` и зависимость от `DayCounter`. Используется паттерн «оркестратор» с событийной моделью.
-- **Экономика и контракты.** `ContractSystem` генерирует заказы на основе числа поселенцев, проверяет наличие ресурсов в инвентаре и перечисляет награду в `Wallet`, а UI (`ContractPanelController` и `ContractView`) реагирует на обновления. Паттерн «сервис + наблюдатель» обеспечивает синхронизацию данных и представления.
-- **Постройки.** Сервис `BuildingService` хранит состояние построек, а `BuildingsOrchestrator` асинхронно переносит ресурсы из инвентаря через `ResourceTransferController`, обновляя `BuildingProgress`, UI панели требований и состояние `Builder`/`BuildingView`. Шаблонные сервисы и события уведомляют подписчиков о прогрессе.
-- **Инвентарь и крафт.** Базовый `ServiceBase` реализует работу с ячейками и события `Changed`; его наследники (`InventoryService`, `ChestService`, `CraftCellService`) объединены `DragDropOrchestrator` и `CraftService`, который проверяет рецепты и расходует выносливость. Используются паттерны «шаблонный метод» и «наблюдатель» для повторно используемой логики.
-- **Поселенцы.** `NpcSystem` управляет данными поселенцев через `NpcService`, обращается к `NpcManager` для спавна и выдачи заданий, а UI (`ManageBoard`, `ManagePanelController`, `VillagerInfoView`) предоставляет взаимодействие игроку. Система опирается на внедрение зависимостей и событий.
-- **Добыча ресурсов.** `MiningSystem` регистрирует `ResourceNode`, списывает выносливость или отправляет результаты в `ChestService`, а `ExtractedItemView` показывает анимацию. Паттерны: наблюдатель (события тикеров) и фасад для доступа к узлам.
-- **Бой.** `EnemyOrchestrator` и `WaveService` создают волны, `EnemyManager` переиспользует объекты врагов, а `BaseEnemy` реализует корутины состояний движения/атаки. `ArcherTowerAttack` применяет пул стрел для защиты. Задействованы паттерны объектного пула и конечного автомата.
-- **Игрок и взаимодействия.** `PlayerOrchestrator` объединяет движение, управление анимацией и взаимодействие через `PlayerInteraction` и интерфейс `IInteractable`, а `ResourceTransferController` визуализирует передачу предметов. Используются паттерны «медиатор» и «команда» для обработки ввода/взаимодействий.
-- **Мир и визуал.** `DayNightSystem` затеняет зарегистрированные `SpriteDimmer`, `SpriteViewController` управляет глобальным шейдером смешивания, а фоновые контроллеры (`CloudManager`, `TreeView`, `StiveView`) добавляют эффекты при помощи пула и случайных параметров. Применяются корутины и tween-анимации.
-
-## Детали по системам
-
-### Игровой цикл
-- `GameDirector` включает физику триггеров, подготавливает волны врагов и запускает асинхронный дневной цикл при старте сцены, делегируя работу `GameCycleOrchestrator`. 【F:Scripts/_Entry Point/Game Director.cs†L5-L28】【F:Scripts/_Entry Point/GameCycleOrchestrator.cs†L5-L58】
-- `GameCycleOrchestrator` инициирует восстановление выносливости, спавн поселенцев, генерацию контрактов и призыв врагов после четвёртого дня, затем ждёт завершения цикла освещения, переводит систему в ночную фазу и проверяет завершение дня перед запуском следующего. 【F:Scripts/_Entry Point/GameCycleOrchestrator.cs†L30-L58】
-- `DayNightSystem` асинхронно изменяет освещение, уведомляя зарегистрированные `SpriteDimmer`, а `DayCounter` подписывается на событие счётчика дней и обновляет UI. 【F:Scripts/Day night system/DayNightSystem.cs†L7-L42】【F:Scripts/Test sprite visual/SpriteDimmer.cs†L5-L33】【F:Scripts/Day night system/DayCounter.cs†L6-L25】
-- `StaminaSystem` хранит базовый запас выносливости, оповещает подписчиков об изменении и предотвращает действия при нехватке ресурса; `StaminaView` визуализирует оставшийся запас. 【F:Scripts/Stamina System/Stamina System.cs†L6-L45】【F:Scripts/Stamina System/Stamina View.cs†L5-L26】
-- Все зависимости и синглтоны объявлены в `GameInstaller`, что подчёркивает использование Zenject для внедрения зависимостей. 【F:Scripts/Zenject/Game Installer.cs†L7-L48】
-
-### Экономика и контракты
-- `Wallet` хранит счёт игрока и через событие `moneyChanged` уведомляет UI (`DayMoneyView`). 【F:Scripts/Money and stats/Wallet.cs†L4-L22】【F:Scripts/Money and stats/Day Money view.cs†L5-L36】
-- `ContractSystem` создаёт список заказов на основе доступных предметов и количества жителей, проверяет выполнение через `InventoryService` и пополняет кошелёк. 【F:Scripts/Contract system/ContractSystem.cs†L6-L62】
-- `ContractPanelController` поддерживает пул карточек, а `ContractView` реализует удержание для завершения заказа, обращаясь к `ContractSystem`. 【F:Scripts/Contract system/ContractPanelController.cs†L5-L57】【F:Scripts/Contract system/UI/ContractView.cs†L8-L81】
-
-### Постройки
-- `BuildingService` хранит метаданные построек и выдаёт точки спавна поселенцев, а `BuildingData` и `BuildingProgress` отслеживают накопленные ресурсы. 【F:Scripts/Building system/BuildingService.cs†L4-L49】【F:Scripts/Building system/BuildingData.cs†L3-L31】【F:Scripts/Building system/BuildingProgress.cs†L5-L51】
-- `BuildingsOrchestrator` запрашивает ресурсы из `InventoryService`, проигрывает анимацию переноса через `ResourceTransferController` и обновляет UI с помощью событий `Builder.ItemAdded`. 【F:Scripts/Building system/BuildingOrchestrator.cs†L6-L47】【F:Scripts/Player/Resours transfer anim/ResourceTransferController.cs†L8-L39】【F:Scripts/Building system/UI/BuildingItemView.cs†L5-L31】
-- `Builder` управляет состоянием конкретного строения, инициирует сбор ресурсов, обновляет статус сервиса и восстанавливает здоровье построек, а `BuildingView` отображает прогресс с помощью DOTween. 【F:Scripts/Building system/Builder.cs†L6-L99】【F:Scripts/Building system/BuildingView.cs†L11-L116】
-- `BaseBuilding` и наследники (`ArcherTower`, `VillagerHome`, `Barricade`) инкапсулируют здоровье и жизненный цикл, позволяя подключать боевые компоненты, например `ArcherTowerAttack`. 【F:Scripts/Building system/BaseBuilding.cs†L5-L41】【F:Scripts/Building system/Buildings/ArcherTower.cs†L5-L21】【F:Scripts/Building system/ArcherTowerAttack.cs†L6-L92】
-
-### Инвентарь и крафт
-- `ServiceBase` предоставляет общий интерфейс слотов, реализуя проверки совместимости, вставку и извлечение с уведомлениями через событие `Changed`. 【F:Scripts/Drag and drop/ServiceBase.cs†L5-L128】
-- `InventoryService` и `ChestService` расширяют базовый сервис, добавляя поиск подходящих ячеек и операции для строительства/контрактов. 【F:Scripts/Inventory System/Inventory Service.cs†L3-L137】【F:Scripts/Interactable Object/ChestService.cs†L3-L44】
-- `CraftCellService` управляет сеткой рецептов, а `CraftService` загружает адресуемые рецепты, сверяет содержимое сетки и расходует выносливость на создание результата. 【F:Scripts/Drag and drop/Craft Cell Service.cs†L3-L37】【F:Scripts/Craft system/Craft Service.cs†L8-L122】
-- `DragDropOrchestrator` интерпретирует клики мыши, перемещая стеки между `IStorageSlots` и `ICraftResultSlots`, а UI-компоненты (`CellView`, `CraftResultCell`, `DragItem`, `CraftGridController`) подписываются на события сервиса. 【F:Scripts/Drag and drop/_Drag Drop Orchestrator.cs†L6-L103】【F:Scripts/Drag and drop/CellView.cs†L7-L64】【F:Scripts/Drag and drop/Craft Result Cell.cs†L9-L64】【F:Scripts/Drag and drop/Drag Item.cs†L5-L25】【F:Scripts/Drag and drop/Grid Controller.cs†L4-L27】
-
-### Поселенцы
-- `NpcService` хранит данные поселенцев, а `NpcSystem` рассчитывает потребности, создаёт данные, вычитает стоимость разблокировки из кошелька и назначает работы. 【F:Scripts/NPC/NpcService.cs†L5-L26】【F:Scripts/NPC/NpcSystem.cs†L8-L94】
-- `NpcManager` создаёт/переиспользует контроллеры жителей, позиционируя их у домов и отправляя на работу, используя `MiningSystem` для определения рабочих точек. 【F:Scripts/NPC/Npc Manager.cs†L8-L119】
-- `ManageBoard` открывает панель при наличии поселенцев, а `ManagePanelController` и `VillagerInfoView` управляют UI разблокировки и назначения профессий через `NpcSystem`. 【F:Scripts/Building system/Buildings/ManageBoard.cs†L5-L30】【F:Scripts/NPC/UI/ManagePanelController.cs†L5-L33】【F:Scripts/NPC/UI/VillagerInfoView.cs†L9-L53】
-
-### Добыча ресурсов
-- `MiningSystem` регистрирует узлы, списывает выносливость за ручную добычу и отправляет добычу рабочих в `ChestService`, а также предоставляет координаты работы. 【F:Scripts/Mining System/MiningSytem.cs†L5-L64】
-- `ResourceNode` запускает корутину добычи при взаимодействии игрока, проверяет вместимость инвентаря, уведомляет подписчиков через события `Tick`/`WorkerTick` и отображает добычу через `ExtractedItemView`. 【F:Scripts/Mining System/ResourceNode.cs†L8-L94】【F:Scripts/Mining System/View/ExtractedItemView.cs†L8-L45】
-
-### Бой и волны
-- `WaveService` конструирует наборы врагов, `EnemyOrchestrator` вызывает нужную волну по номеру дня и делегирует создание и спавн `EnemyManager`. 【F:Scripts/Enemy system/WaveService.cs†L5-L23】【F:Scripts/Enemy system/EnemyOrchestrator.cs†L5-L30】
-- `EnemyManager` создаёт пул врагов по типам, настраивает сортировку слоёв и повторно активирует объекты при спавне, проверяя, остались ли живые противники. 【F:Scripts/Enemy system/EnemyManager.cs†L8-L91】
-- `BaseEnemy` реализует конечный автомат состояний движения и атаки, поиск цели через `Physics2D.Raycast`, а также обновление полоски здоровья. 【F:Scripts/Enemy system/BaseEnemy.cs†L5-L137】
-- Защитные здания, такие как `ArcherTowerAttack`, используют очередь целей и стек стрел (`ArrowController`) для асинхронной стрельбы. 【F:Scripts/Building system/ArcherTowerAttack.cs†L6-L92】【F:Scripts/Prop/Arrow.cs†L4-L24】
-
-### Игрок и взаимодействия
-- `PlayerOrchestrator` агрегирует движение, анимации и взаимодействия, блокируя движение во время активного взаимодействия; `PlayerMovement` и `PlayerView` отвечают за физику и визуал. 【F:Scripts/Player/PlayerOrchestrator.cs†L5-L82】【F:Scripts/Player/PlayerMovement.cs†L3-L33】【F:Scripts/Player/PlayerView.cs†L3-L35】
-- `PlayerInteraction` обрабатывает вход `E/Escape`, переключая состояние взаимодействия на основании `BaseInteractableObject.NeedStopPlayer`. 【F:Scripts/Player/PlayerInteraction.cs†L4-L38】【F:Scripts/Interactable Object/Base Interactable Object.cs†L2-L31】
-- Наследники `BaseInteractableObject` включают `Workbench` (проверяет выносливость для открытия UI), `Chest`, `Stall`, `Bed` (завершает день) и `ManageBoard` (показывает панель управления), связывая игровые сервисы с игроком. 【F:Scripts/Interactable Object/Workbench.cs†L5-L29】【F:Scripts/Interactable Object/Chest.cs†L3-L14】【F:Scripts/Interactable Object/Stall.cs†L5-L24】【F:Scripts/Interactable Object/Bed.cs†L4-L22】【F:Scripts/Building system/Buildings/ManageBoard.cs†L5-L30】
-- `ResourceTransferController` и `TransferItem` создают визуальные эффекты передачи предметов при строительстве. 【F:Scripts/Player/Resours transfer anim/ResourceTransferController.cs†L8-L39】【F:Scripts/Player/Resours transfer anim/TransferItem.cs†L4-L25】
-
-### Мир и визуал
-- `SpriteViewController` управляет глобальным параметром шейдера и корректирует гамму всех зарегистрированных спрайтов, а `TreeView`/`StiveView` регистрируют фоновые элементы. 【F:Scripts/Sprite View Controller.cs†L7-L57】【F:Scripts/Background/Tree view.cs†L4-L18】【F:Scripts/Stive view.cs†L4-L15】
-- `CloudManager` и `Cloud` реализуют объектный пул и движение облаков, используя случайные параметры. 【F:Scripts/Background/Cloud Manager.cs†L4-L73】【F:Scripts/Background/Cloud.cs†L3-L29】
-- `BuildingView` и `ExtractedItemView` демонстрируют применение DOTween для анимации UI/объектов, а `DayNightSystem` обеспечивает циклические эффекты освещения. 【F:Scripts/Building system/BuildingView.cs†L11-L116】【F:Scripts/Mining System/View/ExtractedItemView.cs†L8-L45】【F:Scripts/Day night system/DayNightSystem.cs†L7-L42】
-
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..51e2db99622c7cdc8f4fd893309fc292236e12b2
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,161 @@
++# Обзор игровых скриптов
++
++## Схема подсистем и ключевых классов
++
++- **Игровой цикл**
++  - [`GameDirector`](Scripts/_Entry%20Point/Game%20Director.cs)
++  - [`GameCycleOrchestrator`](Scripts/_Entry%20Point/GameCycleOrchestrator.cs)
++  - [`DayNightSystem`](Scripts/Day%20night%20system/DayNightSystem.cs)
++  - [`DayCounter`](Scripts/Day%20night%20system/DayCounter.cs)
++  - [`StaminaSystem`](Scripts/Stamina%20System/Stamina%20System.cs)
++  - [`StaminaView`](Scripts/Stamina%20System/Stamina%20View.cs)
++- **Экономика и контракты**
++  - [`Wallet`](Scripts/Money%20and%20stats/Wallet.cs)
++  - [`DayMoneyView`](Scripts/Money%20and%20stats/Day%20Money%20view.cs)
++  - [`ContractSystem`](Scripts/Contract%20system/ContractSystem.cs)
++  - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs)
++  - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs)
++- **Постройки**
++  - [`BuildingService`](Scripts/Building%20system/BuildingService.cs)
++  - [`BuildingData`](Scripts/Building%20system/BuildingData.cs)
++  - [`BuildingProgress`](Scripts/Building%20system/BuildingProgress.cs)
++  - [`BuildingsOrchestrator`](Scripts/Building%20system/BuildingOrchestrator.cs)
++  - [`Builder`](Scripts/Building%20system/Builder.cs)
++  - [`BuildingView`](Scripts/Building%20system/BuildingView.cs)
++  - [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs)
++  - [`BaseBuilding`](Scripts/Building%20system/BaseBuilding.cs) и наследники: [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs), [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs)
++- **Инвентарь и крафт**
++  - [`ServiceBase`](Scripts/Drag%20and%20drop/ServiceBase.cs)
++  - [`InventoryService`](Scripts/Inventory%20System/Inventory%20Service.cs)
++  - [`ChestService`](Scripts/Interactable%20Object/ChestService.cs)
++  - [`CraftCellService`](Scripts/Drag%20and%20drop/Craft%20Cell%20Service.cs)
++  - [`CraftService`](Scripts/Craft%20system/CraftService.cs)
++  - [`DragDropOrchestrator`](Scripts/Drag%20and%20drop/_Drag%20Drop%20Orchestrator.cs)
++  - UI: [`CellView`](Scripts/Drag%20and%20drop/CellView.cs), [`CraftResultCell`](Scripts/Drag%20and%20drop/Craft%20Result%20Cell.cs), [`DragItem`](Scripts/Drag%20and%20drop/Drag%20Item.cs), [`CraftGridController`](Scripts/Drag%20and%20drop/Grid%20Controller.cs)
++- **Поселенцы**
++  - [`NpcSystem`](Scripts/NPC/NpcSystem.cs)
++  - [`NpcService`](Scripts/NPC/NpcService.cs)
++  - [`NpcManager`](Scripts/NPC/Npc%20Manager.cs)
++  - UI: [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs), [`ManagePanelController`](Scripts/NPC/UI/ManagePanelController.cs), [`VillagerInfoView`](Scripts/NPC/UI/VillagerInfoView.cs)
++- **Добыча ресурсов**
++  - [`MiningSystem`](Scripts/Mining%20System/MiningSytem.cs)
++  - [`ResourceNode`](Scripts/Mining%20System/ResourceNode.cs)
++  - [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs)
++- **Бой и оборона**
++  - [`EnemyOrchestrator`](Scripts/Enemy%20system/EnemyOrchestrator.cs)
++  - [`WaveService`](Scripts/Enemy%20system/WaveService.cs)
++  - [`EnemyManager`](Scripts/Enemy%20system/EnemyManager.cs)
++  - [`BaseEnemy`](Scripts/Enemy%20system/BaseEnemy.cs) и производные
++  - [`ArcherTowerAttack`](Scripts/Building%20system/ArcherTowerAttack.cs)
++- **Игрок и взаимодействия**
++  - [`PlayerOrchestrator`](Scripts/Player/PlayerOrchestrator.cs)
++  - [`PlayerMovement`](Scripts/Player/PlayerMovement.cs)
++  - [`PlayerView`](Scripts/Player/PlayerView.cs)
++  - [`PlayerInteraction`](Scripts/Player/PlayerInteraction.cs)
++  - [`BaseInteractableObject`](Scripts/Interactable%20Object/Base%20Interactable%20Object.cs) и наследники: [`Workbench`](Scripts/Interactable%20Object/Workbench.cs), [`Chest`](Scripts/Interactable%20Object/Chest.cs), [`Stall`](Scripts/Interactable%20Object/Stall.cs), [`Bed`](Scripts/Interactable%20Object/Bed.cs)
++  - [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs), [`TransferItem`](Scripts/Player/Resours%20transfer%20anim/TransferItem.cs)
++- **Мир и визуал**
++  - [`SpriteViewController`](Scripts/Sprite%20View%20Controller.cs)
++  - [`SpriteDimmer`](Scripts/Test%20sprite%20visual/SpriteDimmer.cs)
++  - [`CloudManager`](Scripts/Background/Cloud%20Manager.cs)
++  - [`Cloud`](Scripts/Background/Cloud.cs)
++  - [`TreeView`](Scripts/Background/Tree%20view.cs)
++  - [`StiveView`](Scripts/Stive%20view.cs)
++
++## Краткие описания систем
++### Игровой цикл
++- **Отвечает за:** запуск дневного цикла, подготовку волн и синхронизацию подсистем дня/ночи, поселенцев, контрактов, выносливости и врагов.
++- **Взаимодействует с:** `GameCycleOrchestrator`, `DayNightSystem`, `DayCounter`, `StaminaSystem`, `NpcSystem`, `ContractSystem`, `EnemyOrchestrator`.
++- **Паттерны:** оркестратор, событийная модель.
++
++### Экономика и контракты
++- **Отвечает за:** генерацию заказов, проверку наличия ресурсов и выдачу наград.
++- **Взаимодействует с:** `ContractSystem`, `InventoryService`, `Wallet`, `ContractPanelController`, `ContractView`.
++- **Паттерны:** сервис, наблюдатель.
++
++### Постройки
++- **Отвечает за:** хранение состояния построек, автоматизированную доставку ресурсов и визуализацию прогресса.
++- **Взаимодействует с:** `BuildingService`, `BuildingsOrchestrator`, `ResourceTransferController`, `Builder`, `BuildingView`.
++- **Паттерны:** сервисы для состояния, событийные уведомления.
++
++### Инвентарь и крафт
++- **Отвечает за:** унифицированную работу со слотами, проверку рецептов и расход выносливости при создании предметов.
++- **Взаимодействует с:** `ServiceBase`, `InventoryService`, `ChestService`, `CraftCellService`, `DragDropOrchestrator`, `CraftService`.
++- **Паттерны:** шаблонный метод, наблюдатель.
++
++### Поселенцы
++- **Отвечает за:** хранение данных жителей, выдачу профессий и интерфейс управления.
++- **Взаимодействует с:** `NpcSystem`, `NpcService`, `NpcManager`, `ManageBoard`, `ManagePanelController`, `VillagerInfoView`, `MiningSystem`, `Wallet`.
++- **Паттерны:** внедрение зависимостей, событийные каналы.
++
++### Добыча ресурсов
++- **Отвечает за:** регистрацию точек добычи, списание выносливости и обработку результатов.
++- **Взаимодействует с:** `MiningSystem`, `ResourceNode`, `ChestService`, `ExtractedItemView`, `NpcSystem`, `StaminaSystem`.
++- **Паттерны:** наблюдатель, фасад.
++
++### Бой
++- **Отвечает за:** построение волн врагов, управление их жизненным циклом и взаимодействие с оборонительными постройками.
++- **Взаимодействует с:** `EnemyOrchestrator`, `WaveService`, `EnemyManager`, `BaseEnemy`, `ArcherTowerAttack`, `GameCycleOrchestrator`.
++- **Паттерны:** объектный пул, конечный автомат.
++
++### Игрок и взаимодействия
++- **Отвечает за:** управление перемещением и анимациями игрока, а также обработку взаимодействий с объектами сцены.
++- **Взаимодействует с:** `PlayerOrchestrator`, `PlayerMovement`, `PlayerView`, `PlayerInteraction`, `BaseInteractableObject`, `ResourceTransferController`.
++- **Паттерны:** медиатор, команда.
++
++### Мир и визуал
++- **Отвечает за:** изменение освещения сцены, настройку визуальных эффектов и управление фоновыми элементами.
++- **Взаимодействует с:** `DayNightSystem`, `SpriteDimmer`, `SpriteViewController`, `CloudManager`, `TreeView`, `StiveView`.
++- **Паттерны:** корутины, объектный пул, tween-анимации.
++## Детали по системам
++
++### Игровой цикл
++- [`GameDirector`](Scripts/_Entry%20Point/Game%20Director.cs) включает физику триггеров, подготавливает волны врагов и запускает асинхронный дневной цикл при старте сцены, делегируя работу [`GameCycleOrchestrator`](Scripts/_Entry%20Point/GameCycleOrchestrator.cs).
++- [`GameCycleOrchestrator`](Scripts/_Entry%20Point/GameCycleOrchestrator.cs) инициирует восстановление выносливости, спавн поселенцев, генерацию контрактов и призыв врагов после четвёртого дня, затем ждёт завершения цикла освещения, переводит систему в ночную фазу и проверяет завершение дня перед запуском следующего.
++- [`DayNightSystem`](Scripts/Day%20night%20system/DayNightSystem.cs) асинхронно изменяет освещение, уведомляя зарегистрированные [`SpriteDimmer`](Scripts/Test%20sprite%20visual/SpriteDimmer.cs), а [`DayCounter`](Scripts/Day%20night%20system/DayCounter.cs) подписывается на счётчик дней и обновляет UI.
++- [`StaminaSystem`](Scripts/Stamina%20System/Stamina%20System.cs) хранит базовый запас выносливости, оповещает подписчиков об изменении и предотвращает действия при нехватке ресурса; [`StaminaView`](Scripts/Stamina%20System/Stamina%20View.cs) визуализирует оставшийся запас.
++- Все зависимости и синглтоны объявлены в [`GameInstaller`](Scripts/Zenject/Game%20Installer.cs), что подчёркивает использование Zenject для внедрения зависимостей.
++
++### Экономика и контракты
++- [`Wallet`](Scripts/Money%20and%20stats/Wallet.cs) хранит счёт игрока и через событие `moneyChanged` уведомляет UI ([`DayMoneyView`](Scripts/Money%20and%20stats/Day%20Money%20view.cs)).
++- [`ContractSystem`](Scripts/Contract%20system/ContractSystem.cs) создаёт список заказов на основе доступных предметов и количества жителей, проверяет выполнение через `InventoryService` и пополняет кошелёк.
++- [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) поддерживает пул карточек, а [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) реализует удержание для завершения заказа, обращаясь к `ContractSystem`.
++
++### Постройки
++- [`BuildingService`](Scripts/Building%20system/BuildingService.cs) хранит метаданные построек и выдаёт точки спавна поселенцев, а [`BuildingData`](Scripts/Building%20system/BuildingData.cs) и [`BuildingProgress`](Scripts/Building%20system/BuildingProgress.cs) отслеживают накопленные ресурсы.
++- [`BuildingsOrchestrator`](Scripts/Building%20system/BuildingOrchestrator.cs) запрашивает ресурсы из `InventoryService`, проигрывает анимацию переноса через [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) и обновляет UI с помощью событий `Builder.ItemAdded` (см. [`BuildingItemView`](Scripts/Building%20system/UI/BuildingItemView.cs)).
++- [`Builder`](Scripts/Building%20system/Builder.cs) управляет состоянием конкретного строения, инициирует сбор ресурсов, обновляет статус сервиса и восстанавливает здоровье построек, а [`BuildingView`](Scripts/Building%20system/BuildingView.cs) отображает прогресс с помощью DOTween.
++- [`BaseBuilding`](Scripts/Building%20system/BaseBuilding.cs) и наследники вроде [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs) и [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs) инкапсулируют здоровье и жизненный цикл, позволяя подключать боевые компоненты, например [`ArcherTowerAttack`](Scripts/Building%20system/ArcherTowerAttack.cs).
++
++### Инвентарь и крафт
++- [`ServiceBase`](Scripts/Drag%20and%20drop/ServiceBase.cs) предоставляет общий интерфейс слотов, реализуя проверки совместимости, вставку и извлечение с уведомлениями через событие `Changed`.
++- [`InventoryService`](Scripts/Inventory%20System/Inventory%20Service.cs) и [`ChestService`](Scripts/Interactable%20Object/ChestService.cs) расширяют базовый сервис, добавляя поиск подходящих ячеек и операции для строительства и контрактов.
++- [`CraftCellService`](Scripts/Drag%20and%20drop/Craft%20Cell%20Service.cs) управляет сеткой рецептов, а [`CraftService`](Scripts/Craft%20system/CraftService.cs) загружает адресуемые рецепты, сверяет содержимое сетки и расходует выносливость на создание результата.
++- [`DragDropOrchestrator`](Scripts/Drag%20and%20drop/_Drag%20Drop%20Orchestrator.cs) интерпретирует клики мыши, перемещая стеки между `IStorageSlots` и `ICraftResultSlots`, а UI-компоненты ([`CellView`](Scripts/Drag%20and%20drop/CellView.cs), [`CraftResultCell`](Scripts/Drag%20and%20drop/Craft%20Result%20Cell.cs), [`DragItem`](Scripts/Drag%20and%20drop/Drag%20Item.cs), [`CraftGridController`](Scripts/Drag%20and%20drop/Grid%20Controller.cs)) подписываются на события сервиса.
++
++### Поселенцы
++- [`NpcService`](Scripts/NPC/NpcService.cs) хранит данные поселенцев, а [`NpcSystem`](Scripts/NPC/NpcSystem.cs) рассчитывает потребности, создаёт данные, вычитает стоимость разблокировки из кошелька и назначает работы.
++- [`NpcManager`](Scripts/NPC/Npc%20Manager.cs) создаёт и переиспользует контроллеры жителей, позиционируя их у домов и отправляя на работу, используя `MiningSystem` для определения рабочих точек.
++- [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs) открывает панель при наличии поселенцев, а [`ManagePanelController`](Scripts/NPC/UI/ManagePanelController.cs) и [`VillagerInfoView`](Scripts/NPC/UI/VillagerInfoView.cs) управляют UI разблокировки и назначения профессий через `NpcSystem`.
++
++### Добыча ресурсов
++- [`MiningSystem`](Scripts/Mining%20System/MiningSytem.cs) регистрирует узлы, списывает выносливость за ручную добычу и отправляет добычу рабочих в `ChestService`, а также предоставляет координаты работы.
++- [`ResourceNode`](Scripts/Mining%20System/ResourceNode.cs) запускает корутину добычи при взаимодействии игрока, проверяет вместимость инвентаря, уведомляет подписчиков через события `Tick`/`WorkerTick` и отображает добычу через [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs).
++
++### Бой и волны
++- [`WaveService`](Scripts/Enemy%20system/WaveService.cs) конструирует наборы врагов, [`EnemyOrchestrator`](Scripts/Enemy%20system/EnemyOrchestrator.cs) вызывает нужную волну по номеру дня и делегирует создание и спавн [`EnemyManager`](Scripts/Enemy%20system/EnemyManager.cs).
++- [`EnemyManager`](Scripts/Enemy%20system/EnemyManager.cs) создаёт пул врагов по типам, настраивает сортировку слоёв и повторно активирует объекты при спавне, проверяя, остались ли живые противники.
++- [`BaseEnemy`](Scripts/Enemy%20system/BaseEnemy.cs) реализует конечный автомат состояний движения и атаки, поиск цели через `Physics2D.Raycast`, а также обновление полоски здоровья.
++- Защитные здания, такие как [`ArcherTowerAttack`](Scripts/Building%20system/ArcherTowerAttack.cs), используют очередь целей и стек стрел ([`Arrow`](Scripts/Prop/Arrow.cs)) для асинхронной стрельбы.
++
++### Игрок и взаимодействия
++- [`PlayerOrchestrator`](Scripts/Player/PlayerOrchestrator.cs) агрегирует движение, анимации и взаимодействия, блокируя перемещение во время активного взаимодействия; [`PlayerMovement`](Scripts/Player/PlayerMovement.cs) и [`PlayerView`](Scripts/Player/PlayerView.cs) отвечают за физику и визуал.
++- [`PlayerInteraction`](Scripts/Player/PlayerInteraction.cs) обрабатывает вход `E/Escape`, переключая состояние взаимодействия на основании `BaseInteractableObject.NeedStopPlayer`.
++- Наследники [`BaseInteractableObject`](Scripts/Interactable%20Object/Base%20Interactable%20Object.cs) включают [`Workbench`](Scripts/Interactable%20Object/Workbench.cs) (проверяет выносливость для открытия UI), [`Chest`](Scripts/Interactable%20Object/Chest.cs), [`Stall`](Scripts/Interactable%20Object/Stall.cs), [`Bed`](Scripts/Interactable%20Object/Bed.cs) (завершает день) и [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs), связывая игровые сервисы с игроком.
++- [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) и [`TransferItem`](Scripts/Player/Resours%20transfer%20anim/TransferItem.cs) создают визуальные эффекты передачи предметов при строительстве.
++
++### Мир и визуал
++- [`SpriteViewController`](Scripts/Sprite%20View%20Controller.cs) управляет глобальным параметром шейдера и корректирует гамму всех зарегистрированных спрайтов, а [`TreeView`](Scripts/Background/Tree%20view.cs) и [`StiveView`](Scripts/Stive%20view.cs) регистрируют фоновые элементы.
++- [`CloudManager`](Scripts/Background/Cloud%20Manager.cs) и [`Cloud`](Scripts/Background/Cloud.cs) реализуют объектный пул и движение облаков, используя случайные параметры.
++- [`BuildingView`](Scripts/Building%20system/BuildingView.cs) и [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs) демонстрируют применение DOTween для анимации UI и объектов, а [`DayNightSystem`](Scripts/Day%20night%20system/DayNightSystem.cs) обеспечивает циклические эффекты освещения.
++
