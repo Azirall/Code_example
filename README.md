@@ -28,7 +28,7 @@
 - [`ContractSystem`](Scripts/Contract%20system/ContractSystem.cs) — проверяет выполнение контрактов и выдаёт награды.
 - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
 - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
-
+![](Gifs/Contract.gif)
 ![](https://github.com/Code_example/Gifs/Contract.gif)
 ### Постройки
 
