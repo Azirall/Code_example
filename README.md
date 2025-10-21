@@ -2,42 +2,6 @@
 ## Общая информация: 
 Репозиторий представлен как демонстрация кода и его использования в игровом проекте. Не является актуальной версией игры.
 
-
-## 1. Общая схема подсистем
-
-```mermaid
-graph TD
-    GameCycle[Игровой цикл]
-    Economy[Экономика и контракты]
-    Buildings[Постройки]
-    Inventory[Инвентарь и крафт]
-    Settlers[Поселенцы]
-    Mining[Добыча ресурсов]
-    Combat[Бой и оборона]
-    Player[Игрок и взаимодействия]
-    World[Мир и визуал]
-
-    GameCycle <--> Economy
-    GameCycle <--> Buildings
-    GameCycle <--> Settlers
-    GameCycle <--> Combat
-    GameCycle <--> Player
-    GameCycle <--> World
-    Economy <--> Inventory
-    Economy <--> Buildings
-    Economy <--> Settlers
-    Buildings <--> Inventory
-    Buildings <--> Settlers
-    Buildings <--> Combat
-    Inventory <--> Mining
-    Inventory <--> Player
-    Mining <--> Player
-    Player <--> World
-    Combat <--> World
-```
-
-## 2. Подсистемы
-
 ### Игровой цикл
 
 **Назначение.** Управляет сменой дня и ночи, распределяет игровые фазы и уведомляет остальные системы о переходах.
