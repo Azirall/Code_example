@@ -16,8 +16,6 @@
 - [`Stamina System`](Scripts/Stamina%20System/Stamina%20System.cs) — восстанавливает выносливость между циклами.
 - [`Stamina View`](Scripts/Stamina%20System/Stamina%20View.cs) — отображает текущий уровень выносливости игрока.
 
-_Здесь можно разместить гифку системы._
-
 ### Экономика и контракты
 
 **Назначение.** Формирует и проверяет контракты, ведёт учёт валюты и обновляет связанные интерфейсы.
@@ -31,8 +29,7 @@ _Здесь можно разместить гифку системы._
 - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
 - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
 
-_Здесь можно разместить гифку системы._
-
+![Контракты](https://github.com/Azirall/Code_example/blob/main/gifs/Contract.gif?raw=true)
 ### Постройки
 
 **Назначение.** Описывает строительство объектов, передачу ресурсов в сервис постройки и прогресс возведения на сцене.
@@ -52,7 +49,7 @@ _Здесь можно разместить гифку системы._
 - [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) — анимирует передачу ресурсов в строительный сервис.
 - [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs), [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs) — конкретные реализации построек и их логика.
 
-_Здесь можно разместить гифку системы._
+![Строительство](https://github.com/Azirall/Code_example/blob/main/gifs/Constructing.gif?raw=true)
 
 ### Инвентарь и крафт
 
@@ -73,7 +70,7 @@ _Здесь можно разместить гифку системы._
 - [`Grid Controller`](Scripts/Drag%20and%20drop/Grid%20Controller.cs) — управляет регистрацией слотов в сервисе.
 - [`Inventory Grid Controller`](Scripts/Inventory%20System/Inventory%20Grid%20Controller.cs) — связывает инвентарь с UI сеткой.
 
-_Здесь можно разместить гифку системы._
+![Крафт](https://github.com/Azirall/Code_example/blob/main/gifs/Craft.gif?raw=true)
 
 ### Поселенцы
 
@@ -93,8 +90,6 @@ _Здесь можно разместить гифку системы._
 - [`ManagePanelView`](Scripts/NPC/UI/ManagePanelView.cs) — отображает список жителей и их статусы.
 - [`VillagerInfoView`](Scripts/NPC/UI/VillagerInfoView.cs) — показывает подробности конкретного жителя.
 
-_Здесь можно разместить гифку системы._
-
 ### Добыча ресурсов
 
 **Назначение.** Управляет источниками ресурсов, процессом добычи и передачей предметов в [`Inventory Service`](Scripts/Inventory%20System/Inventory%20Service.cs).
@@ -105,7 +100,7 @@ _Здесь можно разместить гифку системы._
 - [`IResourceNode`](Scripts/Mining%20System/IResourceNode.cs) — контракт для взаимодействия с узлами добычи.
 - [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs) — визуализирует полученные предметы.
 
-_Здесь можно разместить гифку системы._
+![Добыча](https://github.com/Azirall/Code_example/blob/main/gifs/Mining.gif?raw=true)
 
 ### Бой и оборона
 
@@ -122,7 +117,7 @@ _Здесь можно разместить гифку системы._
 - [`HealthView`](Scripts/Enemy%20system/HealthView.cs) — отображает здоровье противника.
 - [`Skeleton`](Scripts/Enemy%20system/Skeleton.cs), [`Zombie`](Scripts/Enemy%20system/Zombie.cs) — конкретные типы врагов и их характеристики.
 
-_Здесь можно разместить гифку системы._
+![Враги](https://github.com/Azirall/Code_example/blob/main/gifs/Enemy.gif?raw=true)
 
 ### Игрок и взаимодействия
 
@@ -141,8 +136,6 @@ _Здесь можно разместить гифку системы._
 - [`ChestGirldController`](Scripts/Interactable%20Object/ChestGirldController.cs) — управляет отображением содержимого сундуков.
 - [`InteractibleGlow`](Scripts/Interactable%20Object/InteractibleGlow.cs) — подсвечивает активные объекты при наведении.
 
-_Здесь можно разместить гифку системы._
-
 ### Мир и визуал
 
 **Назначение.** Отвечает за освещение, атмосферные эффекты и декоративные элементы сцены.
@@ -155,7 +148,5 @@ _Здесь можно разместить гифку системы._
 - [`Cloud Manager`](Scripts/Background/Cloud%20Manager.cs) — создаёт и обновляет облака.
 - [`Cloud`](Scripts/Background/Cloud.cs) — описывает поведение отдельного облака.
 - [`Tree view`](Scripts/Background/Tree%20view.cs) — контролирует отображение деревьев.
-
-_Здесь можно разместить гифку системы._
 
 >>>>>>> main
