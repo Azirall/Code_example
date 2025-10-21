@@ -29,7 +29,7 @@
 - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
 - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
 
-![Контракты](https://github.com/Azirall/Code_example/blob/main/Gifs/Contract.gif?raw=true)
+<video src="Gifs/Contract.mp4" controls loop muted playsinline title="Контракты"></video>
 ### Постройки
 
 **Назначение.** Описывает строительство объектов, передачу ресурсов в сервис постройки и прогресс возведения на сцене.
@@ -49,7 +49,7 @@
 - [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) — анимирует передачу ресурсов в строительный сервис.
 - [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs), [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs) — конкретные реализации построек и их логика.
 
-![Строительство](https://github.com/Azirall/Code_example/blob/main/Gifs/Constructing.gif?raw=true)
+<video src="Gifs/Constructing.mp4" controls loop muted playsinline title="Строительство"></video>
 
 ### Инвентарь и крафт
 
@@ -70,7 +70,7 @@
 - [`Grid Controller`](Scripts/Drag%20and%20drop/Grid%20Controller.cs) — управляет регистрацией слотов в сервисе.
 - [`Inventory Grid Controller`](Scripts/Inventory%20System/Inventory%20Grid%20Controller.cs) — связывает инвентарь с UI сеткой.
 
-![Крафт](https://github.com/Azirall/Code_example/blob/main/Gifs/Craft.gif?raw=true)
+<video src="Gifs/Craft.mp4" controls loop muted playsinline title="Крафт"></video>
 
 ### Поселенцы
 
@@ -100,7 +100,7 @@
 - [`IResourceNode`](Scripts/Mining%20System/IResourceNode.cs) — контракт для взаимодействия с узлами добычи.
 - [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs) — визуализирует полученные предметы.
 
-![Добыча](https://github.com/Azirall/Code_example/blob/main/Gifs/Mining.gif?raw=true)
+<video src="Gifs/Mining.mp4" controls loop muted playsinline title="Добыча"></video>
 
 ### Бой и оборона
 
@@ -117,7 +117,7 @@
 - [`HealthView`](Scripts/Enemy%20system/HealthView.cs) — отображает здоровье противника.
 - [`Skeleton`](Scripts/Enemy%20system/Skeleton.cs), [`Zombie`](Scripts/Enemy%20system/Zombie.cs) — конкретные типы врагов и их характеристики.
 
-![Враги](https://github.com/Azirall/Code_example/blob/main/Gifs/Enemy.gif?raw=true)
+<video src="Gifs/Enemy.mp4" controls loop muted playsinline title="Враги"></video>
 
 ### Игрок и взаимодействия
 
