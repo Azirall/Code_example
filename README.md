@@ -4,15 +4,36 @@
 
 ## 1. Общая схема подсистем
 
-- **Игровой цикл** ↔ Экономика и контракты, Постройки, Поселенцы, Бой и оборона, Мир и визуал, Игрок и взаимодействия
-- **Экономика и контракты** ↔ Игровой цикл, Инвентарь и крафт, Постройки, Поселенцы
-- **Постройки** ↔ Игровой цикл, Экономика и контракты, Инвентарь и крафт, Поселенцы, Бой и оборона
-- **Инвентарь и крафт** ↔ Экономика и контракты, Постройки, Добыча ресурсов, Игрок и взаимодействия
-- **Поселенцы** ↔ Игровой цикл, Экономика и контракты, Постройки, Бой и оборона
-- **Добыча ресурсов** ↔ Инвентарь и крафт, Игровой цикл, Игрок и взаимодействия
-- **Бой и оборона** ↔ Игровой цикл, Постройки, Поселенцы, Мир и визуал
-- **Игрок и взаимодействия** ↔ Игровой цикл, Инвентарь и крафт, Добыча ресурсов, Мир и визуал
-- **Мир и визуал** ↔ Игровой цикл, Бой и оборона, Игрок и взаимодействия
+```mermaid
+graph TD
+    GameCycle[Игровой цикл]
+    Economy[Экономика и контракты]
+    Buildings[Постройки]
+    Inventory[Инвентарь и крафт]
+    Settlers[Поселенцы]
+    Mining[Добыча ресурсов]
+    Combat[Бой и оборона]
+    Player[Игрок и взаимодействия]
+    World[Мир и визуал]
+
+    GameCycle <--> Economy
+    GameCycle <--> Buildings
+    GameCycle <--> Settlers
+    GameCycle <--> Combat
+    GameCycle <--> Player
+    GameCycle <--> World
+    Economy <--> Inventory
+    Economy <--> Buildings
+    Economy <--> Settlers
+    Buildings <--> Inventory
+    Buildings <--> Settlers
+    Buildings <--> Combat
+    Inventory <--> Mining
+    Inventory <--> Player
+    Mining <--> Player
+    Player <--> World
+    Combat <--> World
+```
 
 ## 2. Подсистемы
 
@@ -26,7 +47,7 @@
 - [`Game Director`](Scripts/_Entry%20Point/Game%20Director.cs) — стартует игровой цикл и регистрирует сервисы сцены.
 - [`GameCycleOrchestrator`](Scripts/_Entry%20Point/GameCycleOrchestrator.cs) — координирует смену фаз и рассылку событий.
 - [`DayNightSystem`](Scripts/Day%20night%20system/DayNightSystem.cs) — изменяет время суток и триггерит визуальные эффекты.
-- [`DayCounter`](Scripts/Day%20night%20system/DayCounter.cs) — ведёт учёт дней и сообщает о наступлении ночи/утра.
+- [`DayCounterView`](Scripts/Day%20night%20system/DayCounterView.cs) — отображает текущий день и реагирует на смену фаз.
 - [`Stamina System`](Scripts/Stamina%20System/Stamina%20System.cs) — восстанавливает выносливость между циклами.
 - [`Stamina View`](Scripts/Stamina%20System/Stamina%20View.cs) — отображает текущий уровень выносливости игрока.
 
@@ -42,14 +63,14 @@ _Здесь можно разместить гифку системы._
 - [`Wallet`](Scripts/Money%20and%20stats/Wallet.cs) — хранит баланс игрока и обрабатывает поступления/расходы.
 - [`Day Money view`](Scripts/Money%20and%20stats/Day%20Money%20view.cs) — визуализирует дневной доход.
 - [`ContractSystem`](Scripts/Contract%20system/ContractSystem.cs) — проверяет выполнение контрактов и выдаёт награды.
-- [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов в UI.
-- [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и контролирует подтверждение игроком.
+- [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
+- [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
 
 _Здесь можно разместить гифку системы._
 
 ### Постройки
 
-**Назначение.** Описывает строительство объектов, доставку ресурсов и прогресс возведения на сцене.
+**Назначение.** Описывает строительство объектов, передачу ресурсов в сервис постройки и прогресс возведения на сцене.
 
 **Паттерны.** Сервис данных (`BuildingService`), оркестратор (`BuildingOrchestrator`), событийная модель для UI, пул анимаций ресурсов.
 
@@ -63,7 +84,7 @@ _Здесь можно разместить гифку системы._
 - [`BuildingItemView`](Scripts/Building%20system/UI/BuildingItemView.cs) — отображает элементы построек в интерфейсе выбора.
 - [`BaseBuilding`](Scripts/Building%20system/BaseBuilding.cs) — базовый класс для всех конкретных построек.
 - [`ArcherTowerAttack`](Scripts/Building%20system/ArcherTowerAttack.cs) — управляет атакующими действиями башни.
-- [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) — анимирует доставку ресурсов к стройкам.
+- [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) — анимирует передачу ресурсов в строительный сервис.
 - [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs), [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs) — конкретные реализации построек и их логика.
 
 _Здесь можно разместить гифку системы._
@@ -72,7 +93,7 @@ _Здесь можно разместить гифку системы._
 
 **Назначение.** Объединяет взаимодействие со слотами, рецепты крафта и управление предметами в интерфейсе.
 
-**Паттерны.** Шаблонный метод (`ServiceBase`), наблюдатель для синхронизации UI, стратегия распределения предметов, медиатор перетаскивания.
+**Паттерны.** Шаблонный метод (`ServiceBase`), наблюдатель для синхронизации UI, стратегия распределения предметов, посредник перетаскивания.
 
 **Ключевые скрипты.**
 - [`ServiceBase`](Scripts/Drag%20and%20drop/ServiceBase.cs) — задаёт общие операции со слотами и инвентарём.
@@ -93,7 +114,7 @@ _Здесь можно разместить гифку системы._
 
 **Назначение.** Управляет созданием, назначением работ и отображением информации о жителях.
 
-**Паттерны.** Внедрение зависимостей (Zenject), событийные каналы между сервисами и UI, пул контроллеров персонажей.
+**Паттерны.** Внедрение зависимостей (Zenject), пул контроллеров персонажей.
 
 **Ключевые скрипты.**
 - [`NpcSystem`](Scripts/NPC/NpcSystem.cs) — распределяет задачи и контролирует статусы поселенцев.
@@ -111,9 +132,7 @@ _Здесь можно разместить гифку системы._
 
 ### Добыча ресурсов
 
-**Назначение.** Управляет источниками ресурсов, процессом добычи и передачей предметов в инвентарь.
-
-**Паттерны.** Фасад для работы с узлами (`MiningSytem`), наблюдатель для уведомлений о добыче, коррутины для тайминга.
+**Назначение.** Управляет источниками ресурсов, процессом добычи и передачей предметов в [`Inventory Service`](Scripts/Inventory%20System/Inventory%20Service.cs).
 
 **Ключевые скрипты.**
 - [`MiningSytem`](Scripts/Mining%20System/MiningSytem.cs) — запускает добычу и списывает выносливость.
@@ -144,7 +163,7 @@ _Здесь можно разместить гифку системы._
 
 **Назначение.** Обеспечивает управление игроком, его анимации и взаимодействие с объектами окружения.
 
-**Паттерны.** Медиатор (`PlayerOrchestrator`), паттерн команда для ввода, событийные уведомления интерактивов.
+**Паттерны.** Посредник (`PlayerOrchestrator`), событийные уведомления интерактивных объектов.
 
 **Ключевые скрипты.**
 - [`PlayerOrchestrator`](Scripts/Player/PlayerOrchestrator.cs) — объединяет управление, анимации и взаимодействия.
@@ -171,6 +190,5 @@ _Здесь можно разместить гифку системы._
 - [`Cloud Manager`](Scripts/Background/Cloud%20Manager.cs) — создаёт и обновляет облака.
 - [`Cloud`](Scripts/Background/Cloud.cs) — описывает поведение отдельного облака.
 - [`Tree view`](Scripts/Background/Tree%20view.cs) — контролирует отображение деревьев.
-- [`Stive view`](Scripts/Stive%20view.cs) — визуализирует декоративные элементы земли.
 
 _Здесь можно разместить гифку системы._

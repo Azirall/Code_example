@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using Zenject;
 
-public class DayCounter : MonoBehaviour
+public class DayCounterView : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI dayCountText;
     private GameCycleOrchestrator _gameCycleOrchestrator;
