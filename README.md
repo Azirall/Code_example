@@ -1,4 +1,3 @@
-
 ## Общая информация: 
 Репозиторий представлен как демонстрация кода и его использования в игровом проекте. Не является актуальной версией игры.
 
@@ -28,7 +27,10 @@
 - [`ContractSystem`](Scripts/Contract%20system/ContractSystem.cs) — проверяет выполнение контрактов и выдаёт награды.
 - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
 - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
-![](Gifs/Contract.gif)
+<p align="center">
+  <img src="Gifs/Contract.gif" alt="Contract demo">
+</p>
+
 ### Постройки
 
 **Назначение.** Описывает строительство объектов, передачу ресурсов в сервис постройки и прогресс возведения на сцене.
@@ -48,7 +50,9 @@
 - [`ResourceTransferController`](Scripts/Player/Resours%20transfer%20anim/ResourceTransferController.cs) — анимирует передачу ресурсов в строительный сервис.
 - [`ArcherTower`](Scripts/Building%20system/Buildings/ArcherTower.cs), [`Barricade`](Scripts/Building%20system/Buildings/Barricade.cs), [`VillagerHome`](Scripts/Building%20system/Buildings/VillagerHome.cs), [`ManageBoard`](Scripts/Building%20system/Buildings/ManageBoard.cs) — конкретные реализации построек и их логика.
 
-![](Gifs/Constructing.gif)
+<p align="center">
+  <img src="Gifs/Constructing.gif" alt="Constructing demo">
+</p>
 
 ### Инвентарь и крафт
 
@@ -68,7 +72,9 @@
 - [`Drag Item`](Scripts/Drag%20and%20drop/Drag%20Item.cs) — визуализирует перемещаемый предмет.
 - [`Grid Controller`](Scripts/Drag%20and%20drop/Grid%20Controller.cs) — управляет регистрацией слотов в сервисе.
 - [`Inventory Grid Controller`](Scripts/Inventory%20System/Inventory%20Grid%20Controller.cs) — связывает инвентарь с UI сеткой.
-![](Gifs/Craft.gif)
+<p align="center">
+  <img src="Gifs/Craft.gif" alt="Craft demo">
+</p>
 
 ### Поселенцы
 
@@ -98,7 +104,9 @@
 - [`IResourceNode`](Scripts/Mining%20System/IResourceNode.cs) — контракт для взаимодействия с узлами добычи.
 - [`ExtractedItemView`](Scripts/Mining%20System/View/ExtractedItemView.cs) — визуализирует полученные предметы.
 
-![](Gifs/Mining.gif)
+<p align="center">
+  <img src="Gifs/Mining.gif" alt="Mining demo">
+</p>
 
 ### Бой и оборона
 
@@ -115,7 +123,9 @@
 - [`HealthView`](Scripts/Enemy%20system/HealthView.cs) — отображает здоровье противника.
 - [`Skeleton`](Scripts/Enemy%20system/Skeleton.cs), [`Zombie`](Scripts/Enemy%20system/Zombie.cs) — конкретные типы врагов и их характеристики.
 
-![](Gifs/Enemy.gif)
+<p align="center">
+  <img src="Gifs/Enemy.gif" alt="Enemy demo">
+</p>
 
 ### Игрок и взаимодействия
 
