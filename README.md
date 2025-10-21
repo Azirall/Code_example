@@ -29,7 +29,7 @@
 - [`ContractPanelController`](Scripts/Contract%20system/ContractPanelController.cs) — управляет списком активных контрактов на панели.
 - [`ContractView`](Scripts/Contract%20system/UI/ContractView.cs) — отображает карточку контракта и подтверждение игроком.
 
-![Контракты](Gifs/Contract.gif)
+![](https://github.com/Code_example/Gifs/Contract.gif)
 ### Постройки
 
 **Назначение.** Описывает строительство объектов, передачу ресурсов в сервис постройки и прогресс возведения на сцене.
